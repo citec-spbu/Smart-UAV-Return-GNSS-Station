@@ -12,9 +12,21 @@ COLORSCHEME = {
         'grass' : (0, 128, 0),
         'leisure' : (0, 128, 128),
         'highway' : (0, 128, 128)
-    }
+}
 
-LIMIT_WIDTH = LIMIT_HEIGHT = 1000
+VISUALIZE_OBJECTS = [
+    'bridge',
+    'building',
+    'water',
+    'grass',
+    'natural',
+    'leisure',
+    'highway'
+]
+
+LIMIT_WIDTH = LIMIT_HEIGHT = 1000   # Does not allow api.Map() to overfit the request
+
+LIMIT_NODE_AMOUNT = 700             # Does not allow api.WaysGet() and api.NodesGet() to overfit the request
 
 api = osmapi.OsmApi()
 
@@ -31,7 +43,7 @@ def handle_osm_api_error(func):
             time.sleep(time_to_sleep)
             return_value = func(*args, **kwargs)
             print(f"APIError got handled, slept for {time_to_sleep} seconds")
-        except Exception:
+        except AssertionError:
             return_value = []
         return return_value
     return wrapper
@@ -43,14 +55,26 @@ def download_sector(sector : list[float]) -> list[dict]:
     return sectors_nodes
 
 @handle_osm_api_error
-def download_ways(relation_id : int) -> list[dict]:
-    ways = api.RelationFull(relation_id)
+def download_ways(relation_id : int) -> dict:
+    relation = api.RelationGet(relation_id)
+    ways_ids = []
+    relation_members = relation['member']
+    for member in relation_members:
+        if member['type'] == 'way':
+            ways_ids.append(member['ref'])
+    if len(ways_ids) > LIMIT_NODE_AMOUNT:
+        return {}
+    ways = api.WaysGet(ways_ids)
     return ways
 
 @handle_osm_api_error
-def download_nodes(nodes_ids : list[int]) -> dict[str:dict]:
+def download_nodes(nodes_ids : list[int]) -> dict:
+    if len(nodes_ids) > LIMIT_NODE_AMOUNT:
+        return {}
     nodes = api.NodesGet(nodes_ids)
     return nodes
+
+#TODO Develope a function to choose the best tag describing an object
 
 class Geomap:
     def __init__(self, min_lon : float, min_lat : float, max_lon : float, max_lat : float) -> None:
@@ -93,14 +117,22 @@ class Geomap:
         sectors = self.__area_sectorization()
         all_nodes = []
         for i, sector in enumerate(sectors, start=1):
-            temp = download_sector(sector)
-            all_nodes += temp
+            all_nodes += download_sector(sector)
             if i % 10 == 0:
                 print(f'{i}/{len(sectors)} sectors were downloaded')
 
-        self.__nodes = {node['data']['id'] : node['data'] for node in all_nodes if node['type'] == 'node'}
-        self.__ways = {node['data']['id'] : node['data'] for node in all_nodes if node['type'] == 'way'}
-        self.__relations = {node['data']['id'] : node['data'] for node in all_nodes if node['type'] == 'relation'}
+        self.__nodes = {
+            node['data']['id'] : node['data'] for node in all_nodes
+            if node['type'] == 'node'
+        }
+        self.__ways = {
+            node['data']['id'] : node['data'] for node in all_nodes
+            if node['type'] == 'way' and 'tag' in node['data'].keys() and any(tag in VISUALIZE_OBJECTS for tag in node['data']['tag'].keys())
+        }
+        self.__relations = {
+            node['data']['id'] : node['data'] for node in all_nodes
+            if node['type'] == 'relation' and 'tag' in node['data'].keys() and node['data']['tag']['type'] == 'multipolygon' and any(tag in VISUALIZE_OBJECTS for tag in node['data']['tag'].keys())
+        }
         return all_nodes
 
     def __relations_visualization(self, image):
@@ -118,10 +150,8 @@ class Geomap:
                 continue
             ways_in_relation = download_ways(relation_id)
 
-            for way in ways_in_relation:
-                if way['type'] != 'way':
-                    continue
-                way_data = way['data']
+            for way_id in ways_in_relation.keys():
+                way_data = ways_in_relation[way_id]
                 node_cords = []
                 way_nodes = download_nodes(way_data['nd'])
                 for node_id in way_data['nd']:
@@ -189,6 +219,7 @@ class Geomap:
 
 
 if __name__ == '__main__':
-    map = Geomap(30.2930, 59.9325, 30.3170, 59.9461)
-    map.get_map_visualization()
-    map.save_image_as('map.png')
+    geomap = Geomap(30.2555, 59.9080, 30.3446, 59.9600)
+    geomap.download_map()
+    geomap.get_map_visualization()
+    geomap.save_image_as('map.png')
