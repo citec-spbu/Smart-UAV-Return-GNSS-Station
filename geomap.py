@@ -14,7 +14,7 @@ COLORSCHEME = {
         'highway' : (0, 128, 128)
     }
 
-LIMIT_WIDTH = LIMIT_HEIGHT = 1500
+LIMIT_WIDTH = LIMIT_HEIGHT = 1000
 
 api = osmapi.OsmApi()
 
@@ -31,8 +31,8 @@ def handle_osm_api_error(func):
             time.sleep(time_to_sleep)
             return_value = func(*args, **kwargs)
             print(f"APIError got handled, slept for {time_to_sleep} seconds")
-        except ValueError:
-            return_value = None
+        except Exception:
+            return_value = []
         return return_value
     return wrapper
 
@@ -58,24 +58,24 @@ class Geomap:
         self.min_lat = min_lat
         self.max_lon = max_lon
         self.max_lat = max_lat
-        self.width = int(geodesic(
+        self.__width = int(geodesic(
             (self.min_lat, self.min_lon), (self.min_lat, self.max_lon)
             ).kilometers * 1000)
-        self.height = int(geodesic(
+        self.__height = int(geodesic(
             (self.min_lat, self.min_lon), (self.max_lat, self.min_lon)
             ).kilometers * 1000)
         self.image = None
-        self.nodes = None
-        self.ways = None
-        self.relations = None
+        self.__nodes = None
+        self.__ways = None
+        self.__relations = None
 
-    def area_sectorization(self) -> list[list[float]]:
+    def __area_sectorization(self) -> list[list[float]]:
         """
         Breaks down the map into sectors of given size, in order to
         make each sector to be callable via API
         """
-        width_ratio = int(np.ceil(self.width / LIMIT_WIDTH))
-        height_ratio = int(np.ceil(self.height / LIMIT_HEIGHT))
+        width_ratio = int(np.ceil(self.__width / LIMIT_WIDTH))
+        height_ratio = int(np.ceil(self.__height / LIMIT_HEIGHT))
         delta_lon = (self.max_lon - self.min_lon) / width_ratio
         delta_lat = (self.max_lat - self.min_lat) / height_ratio
         sectors = []
@@ -90,27 +90,25 @@ class Geomap:
         Downloading given map from OpenStreetMaps.
         Might take a while to be finished
         """
-        sectors = self.area_sectorization()
+        sectors = self.__area_sectorization()
         all_nodes = []
         for i, sector in enumerate(sectors, start=1):
             temp = download_sector(sector)
             all_nodes += temp
             if i % 10 == 0:
                 print(f'{i}/{len(sectors)} sectors were downloaded')
+
+        self.__nodes = {node['data']['id'] : node['data'] for node in all_nodes if node['type'] == 'node'}
+        self.__ways = {node['data']['id'] : node['data'] for node in all_nodes if node['type'] == 'way'}
+        self.__relations = {node['data']['id'] : node['data'] for node in all_nodes if node['type'] == 'relation'}
         return all_nodes
 
-    def get_map_visualization(self):
+    def __relations_visualization(self, image):
         """
-        Making an image out of information, which API has given
+        Drawing OSM relations
         """
-        image = np.zeros((self.width, self.height, 3), np.uint8)
-        all_nodes = self.download_map()
-        self.nodes = {node['data']['id'] : node['data'] for node in all_nodes if node['type'] == 'node'}
-        self.ways = {node['data']['id'] : node['data'] for node in all_nodes if node['type'] == 'way'}
-        self.relations = {node['data']['id'] : node['data'] for node in all_nodes if node['type'] == 'relation'}
-
-        for i, relation_id in enumerate(self.relations.keys(), start=1):
-            relation = self.relations[relation_id]
+        for i, relation_id in enumerate(self.__relations.keys(), start=1):
+            relation = self.__relations[relation_id]
             relation_tags = relation['tag']
             for tag in relation_tags:
                 if tag in COLORSCHEME.keys():
@@ -138,10 +136,15 @@ class Geomap:
                 node_cords = node_cords.reshape((-1, 1, 2))
                 cv2.polylines(image, [node_cords], True, COLORSCHEME[main_tag])
             if i % 100 == 0:
-                print(f"{i}/{len(self.relations)} relations were preprocessed")
+                print(f"{i}/{len(self.__relations)} relations were preprocessed")
+        return image
 
-        for i, way_id in enumerate(self.ways.keys(), start=1):
-            way = self.ways[way_id]
+    def __ways_visualization(self, image):
+        """
+        Drawing OSM ways
+        """
+        for i, way_id in enumerate(self.__ways.keys(), start=1):
+            way = self.__ways[way_id]
             way_tags = way['tag']
             for tag in way_tags:
                 if tag in COLORSCHEME.keys():
@@ -151,7 +154,7 @@ class Geomap:
                 continue
             node_cords = []
             for node_id in way['nd']:
-                node = self.nodes[node_id]
+                node = self.__nodes[node_id]
                 if not (self.min_lat < node['lat'] < self.max_lat and
                             self.min_lon < node['lon'] < self.max_lon):
                         continue
@@ -162,7 +165,18 @@ class Geomap:
             node_cords = node_cords.reshape((-1, 1, 2))
             cv2.polylines(image, [node_cords], True, COLORSCHEME[main_tag])
             if i % 100 == 0:
-                print(f"{i}/{len(self.ways)} ways were preprocessed")
+                print(f"{i}/{len(self.__ways)} ways were preprocessed")
+        return image
+
+    def get_map_visualization(self):
+        """
+        Making an image out of information, which API has given
+        """
+        assert self.__nodes, "Map is not downloaded yet!\nRun download_map() method first!"
+        image = np.zeros((self.__width, self.__height, 3), np.uint8)
+
+        image = self.__relations_visualization(image)
+        image = self.__ways_visualization(image)
 
         self.image = image
         return image
