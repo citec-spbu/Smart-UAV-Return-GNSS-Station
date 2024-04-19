@@ -1,7 +1,5 @@
 opencv-python
-matplotlib
 numpy
-torch
-transformers
 osmapi
+osmium
 geopy

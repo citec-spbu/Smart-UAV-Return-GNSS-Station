@@ -1,4 +1,8 @@
+__*
 .venv/
+.vscode/
 images/
+data/*
 *.png
 *.osm
+*.pbf
