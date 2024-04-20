@@ -21,6 +21,6 @@ res = model(img)[0]
 
 ## Results
 
-![Исаакиевский собор](./predicted_isakiy.jpg)
-![ПУНК](./predicted_punk.jpg)
-![ПМ-ПУ](./predicted_pm.jpg)
+![Исаакиевский собор](./predicted_isakiy.png)
+![ПУНК](./predicted_punk.png)
+![ПМ-ПУ](./predicted_pm.png)
