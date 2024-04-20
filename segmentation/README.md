@@ -23,4 +23,4 @@ res = model(img)[0]
 
 ![Исаакиевский собор](./predicted_isakiy.jpg)
 ![ПУНК](./predicted_punk.jpg)
-![ПМ-ПУ]./(predicted_pm.jpg)
+![ПМ-ПУ](./predicted_pm.jpg)
