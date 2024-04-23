@@ -31,6 +31,8 @@ COLORSCHEME = {
         'primary' : (0, 128, 128),
         'tertiary' : (0, 128, 128),
         'secondary' : (0, 128, 128),
+        'residential' : (0, 128, 128),
+        'service' : (0, 128, 128),
         'construction' : (64, 64, 64),
         'wall' : (255, 0, 128)
 }
@@ -56,7 +58,7 @@ def get_description(tags : dict) -> str:
     """
     for key, value in tags.items():
         if key in VISUALIZE_OBJECTS and value in COLORSCHEME.keys():
-            return value
+            return key, value
     return None
 
 api = osmapi.OsmApi()
@@ -318,7 +320,30 @@ class GeomapFromFile(osmium.SimpleHandler):
             }
             self.__ways.append(way_dict)
 
-    def __visualize_area(self, image):
+    def __extract_object_mask(self, area_mask, area_coordinates : list[float], object_tag : list[str, str]):
+        """
+        Saves object's mask as a file in format "images/<object_tag>/<object_location>.png
+        """
+        crop_above = int(geodesic(
+                        (self.max_lat, self.min_lon), (area_coordinates[2], self.min_lon)
+                        ).kilometers * 1000)
+        crop_under = int(geodesic(
+                        (self.max_lat, self.min_lon), (area_coordinates[0], self.min_lon)
+                        ).kilometers * 1000)
+        crop_left = int(geodesic(
+                        (self.max_lat, self.min_lon), (self.max_lat, area_coordinates[1])
+                        ).kilometers * 1000)
+        crop_right = int(geodesic(
+                        (self.max_lat, self.min_lon), (self.max_lat, area_coordinates[3])
+                        ).kilometers * 1000)
+
+        object_location = ((area_coordinates[2] + area_coordinates[0])/2, (area_coordinates[3] + area_coordinates[1])/2)
+
+        object_mask = area_mask[crop_above:crop_under, crop_left:crop_right]
+        if object_mask.size:
+            cv2.imwrite(f"images/{object_tag[0]}/{object_location[0]};{object_location[1]}.png", object_mask)
+
+    def __visualize_area(self, image, extract_mask : bool = True ):
         """
         Draws areas
         """
@@ -326,35 +351,51 @@ class GeomapFromFile(osmium.SimpleHandler):
             main_tag = get_description(area['tags'])
             if not main_tag:
                 continue
+            area_mask = np.zeros(image.shape, np.uint8)
+            max_lat, min_lat = -90, 90
+            max_lon, min_lon = -180, 180
+            has_outer_rings = has_inner_rings = False
             for outer_ring in area['outer_rings']:
-                node_cords = []
+                outer_node_cords = []
                 for node in outer_ring:
+                    max_lat, min_lat = max(node.location.lat, max_lat), min(node.location.lat, min_lat)
+                    max_lon, min_lon = max(node.location.lon, max_lon), min(node.location.lon, min_lon)
                     node_cord_y = int(geodesic(
                         (self.max_lat, self.min_lon), (node.location.lat, self.min_lon)
                         ).kilometers * 1000)
                     node_cord_x = int(geodesic(
                         (self.max_lat, self.min_lon), (self.max_lat, node.location.lon)
                         ).kilometers * 1000)
-                    node_cords.append([node_cord_x, node_cord_y])
-                if node_cords:
-                    node_cords = np.array(node_cords, np.int32)
-                    node_cords = node_cords.reshape((-1, 1, 2))
-                    cv2.drawContours(image, [node_cords], -1, COLORSCHEME[main_tag], -1)
+                    outer_node_cords.append([node_cord_x, node_cord_y])
+                if outer_node_cords:
+                    has_outer_rings = True
+                    outer_node_cords = np.array(outer_node_cords, np.int32)
+                    outer_node_cords = outer_node_cords.reshape((-1, 1, 2))
+                    cv2.drawContours(area_mask, [outer_node_cords], -1, COLORSCHEME[main_tag[1]], -1)
 
             for inner_ring in area['inner_rings']:
-                node_cords = []
+                inner_node_cords = []
                 for node in inner_ring:
+                    max_lat, min_lat = max(node.location.lat, max_lat), min(node.location.lat, min_lat)
+                    max_lon, min_lon = max(node.location.lon, max_lon), min(node.location.lon, min_lon)
                     node_cord_y = int(geodesic(
                         (self.max_lat, self.min_lon), (node.location.lat, self.min_lon)
                         ).kilometers * 1000)
                     node_cord_x = int(geodesic(
                         (self.max_lat, self.min_lon), (self.max_lat, node.location.lon)
                         ).kilometers * 1000)
-                    node_cords.append([node_cord_x, node_cord_y])
-                if node_cords:
-                    node_cords = np.array(node_cords, np.int32)
-                    node_cords = node_cords.reshape((-1, 1, 2))
-                    cv2.drawContours(image, [node_cords], -1, (0, 0, 0), -1)
+                    inner_node_cords.append([node_cord_x, node_cord_y])
+                if inner_node_cords:
+                    has_inner_rings = True
+                    inner_node_cords = np.array(inner_node_cords, np.int32)
+                    inner_node_cords = inner_node_cords.reshape((-1, 1, 2))
+                    if has_outer_rings:
+                        cv2.drawContours(area_mask, [inner_node_cords], -1, (0, 0, 0), -1)
+                    else:
+                        cv2.drawContours(area_mask, [inner_node_cords], -1, COLORSCHEME[main_tag[1]], -1)
+            if extract_mask and (has_outer_rings or has_inner_rings):
+                self.__extract_object_mask(area_mask, [min_lat, min_lon, max_lat, max_lon], main_tag)
+            image = cv2.addWeighted(image, 1, area_mask, 1, 0)
 
         return image
 
@@ -378,7 +419,7 @@ class GeomapFromFile(osmium.SimpleHandler):
             if node_cords:
                 node_cords = np.array(node_cords, np.int32)
                 node_cords = node_cords.reshape((-1, 1, 2))
-                cv2.polylines(image, [node_cords], True, COLORSCHEME[main_tag], 6)
+                cv2.polylines(image, [node_cords], False, COLORSCHEME[main_tag[1]], 6)
 
         return image
 
@@ -401,7 +442,7 @@ class GeomapFromFile(osmium.SimpleHandler):
         self.image = image
         return image
 
-    def save_image_as(self, file_name : str = 'map.png'):
+    def save_image_as(self, file_name : str = 'images/map.png'):
         """
         Saves map as an image
         """
@@ -411,7 +452,7 @@ if __name__ == '__main__':
     geomap = GeomapFromFile(29.82409, 59.87242, 29.83166, 59.87693)
     geomap.apply_file("data/northwestern-fed-district-latest.osm.pbf")
     geomap.visualize_map()
-    geomap.save_image_as('test1.png')
+    geomap.save_image_as()
 
 
     """

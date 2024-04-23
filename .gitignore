@@ -1,8 +1,7 @@
 __*
 .venv/
 .vscode/
-images/
-data/*
+data/
 *.png
 *.osm
 *.pbf
