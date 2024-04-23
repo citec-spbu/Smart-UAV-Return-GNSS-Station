@@ -15,6 +15,7 @@ COLORSCHEME = {
         'retail' : (0, 0, 255),
         'cathedral' : (0, 0, 128),
         'school' : (0, 0, 128),
+        'dormitory' : (0, 0, 128),
         'hospital' : (0, 0, 128),
         'apartments' : (0, 0, 255),
         'water' : (255, 0, 0),
@@ -24,11 +25,14 @@ COLORSCHEME = {
         'park' : (0, 64, 0),
         'sand' : (128, 128, 0),
         'pitch' : (0, 64, 128),
+        'fitness_station' : (0, 64, 128),
+        'playground' : (0, 64, 128),
         'cemetery' : (0, 64, 255),
         'primary' : (0, 128, 128),
         'tertiary' : (0, 128, 128),
         'secondary' : (0, 128, 128),
-        'construction' : (64, 64, 64)
+        'construction' : (64, 64, 64),
+        'wall' : (255, 0, 128)
 }
 
 VISUALIZE_OBJECTS = [
@@ -38,7 +42,8 @@ VISUALIZE_OBJECTS = [
     'landuse',
     'natural',
     'leisure',
-    'highway'
+    'highway',
+    'barrier'
 ]
 
 LIMIT_WIDTH = LIMIT_HEIGHT = 1000   # Does not allow api.Map() to overfit the request
@@ -403,7 +408,7 @@ class GeomapFromFile(osmium.SimpleHandler):
         cv2.imwrite(file_name, self.image)
 
 if __name__ == '__main__':
-    geomap = GeomapFromFile(30.2555, 59.9080, 30.3446, 59.9600)
+    geomap = GeomapFromFile(29.82409, 59.87242, 29.83166, 59.87693)
     geomap.apply_file("data/northwestern-fed-district-latest.osm.pbf")
     geomap.visualize_map()
     geomap.save_image_as('test1.png')
