@@ -1,5 +1,11 @@
+__*
+.venv/
+.vscode/
+data/
+*.png
+*.osm
+*.pbf
 .DS_store
 **/.DS_store
-
 __pycache__/
 **/__pycache__/
