@@ -449,7 +449,7 @@ class GeomapFromFile(osmium.SimpleHandler):
         cv2.imwrite(file_name, self.image)
 
 if __name__ == '__main__':
-    geomap = GeomapFromFile(29.82409, 59.87242, 29.83166, 59.87693)
+    geomap = GeomapFromFile(30.1801, 59.8841, 30.4623, 60.0149)
     geomap.apply_file("data/northwestern-fed-district-latest.osm.pbf")
     geomap.visualize_map()
     geomap.save_image_as()
