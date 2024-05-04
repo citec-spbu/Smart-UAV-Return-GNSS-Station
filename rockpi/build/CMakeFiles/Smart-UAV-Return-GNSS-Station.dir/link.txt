@@ -1,0 +1,2 @@
+/usr/bin/ar qc libSmart-UAV-Return-GNSS-Station.a "CMakeFiles/Smart-UAV-Return-GNSS-Station.dir/src/geomap_db.cpp.o" "CMakeFiles/Smart-UAV-Return-GNSS-Station.dir/sqlite-amalgamation/sqlite3.c.o"
+/usr/bin/ranlib libSmart-UAV-Return-GNSS-Station.a

@@ -1,5 +1,5 @@
 __*
-.venv/
+venv/
 .vscode/
 data/
 *.png
@@ -9,3 +9,4 @@ data/
 **/.DS_store
 __pycache__/
 **/__pycache__/
+*.db
