@@ -7,16 +7,12 @@ using namespace std;
 
 int main()
 {
-    unsigned emb_dim;
-    string db_name;
-    cout << "Enter your embedding dimension configuration" << endl;
-    cin >> emb_dim;
-    cout << "Enter desirable name of database or the name of existing one" << endl;
-    cin >> db_name;
-    GeomapDB geomap_db(db_name, emb_dim);
+    unsigned emb_dim = 3;
+    string db_name = "geomap.db";
+    string table_name = "geomap_embeddings";
+    GeomapDB geomap_db(emb_dim, db_name, table_name);
 
     string emb;
-    cin.ignore();
     while (getline(cin, emb))
     {
         if (emb == "q")
@@ -31,10 +27,15 @@ int main()
         cout << "Enter lat and lon:" << endl;
         double lat, lon;
         cin >> lat >> lon;
-        geomap_db.insert_embedding(embedding, lat, lon);
+        geomap_db.insert(lat, lon, embedding);
         cin.ignore();
     }
-    vector<vector<double>> closest_emb = geomap_db.get_closest(71, 30, 0.5);
+
+    geomap_db.print_db(cout) << endl;
+
+    cout << "Closest similar embeddings" << endl;
+    vector<double> embedding = {1, 2, 3};
+    vector<vector<double>> closest_emb = geomap_db.get_closest_most_similar(71, 30, embedding, 10, 10);
     for (const auto row : closest_emb)
     {
         for (const auto el : row)
@@ -43,4 +44,5 @@ int main()
         }
         cout << endl;
     }
+    return 0;
 }

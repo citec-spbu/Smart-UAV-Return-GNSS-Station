@@ -1,8 +1,9 @@
 #include <geomap_db.hpp>
 
-GeomapDB::GeomapDB(const std::string &database_name, const unsigned dim_embedding)
+GeomapDB::GeomapDB(const unsigned dim_embedding, const std::string &database_name, const std::string &tbl_name = "geomap_embeddings")
 {
     db_name = database_name;
+    table_name = tbl_name;
     embedding_dim = dim_embedding;
     connection();
     create_table();
@@ -10,7 +11,6 @@ GeomapDB::GeomapDB(const std::string &database_name, const unsigned dim_embeddin
 
 GeomapDB::~GeomapDB()
 {
-    sqlite3_finalize(stmt);
     int rc = sqlite3_close(db);
     if (rc != SQLITE_OK)
     {
@@ -18,27 +18,50 @@ GeomapDB::~GeomapDB()
     }
 }
 
-void GeomapDB::insert_embedding(const std::vector<double> &embedding, const double lat, const double lon)
+std::ostream &GeomapDB::print_db(std::ostream &os)
 {
-    if (embedding.size() != embedding_dim) {
-        throw std::runtime_error("Embedding must have " + std::to_string(embedding_dim) + " cords, " + std::to_string(embedding.size()) + " were given!");
-    }
-    std::string embedding_str = "";
-    for (const auto embedding_cord : embedding)
+    std::string query = "SELECT * FROM " + table_name;
+    std::vector<std::vector<double>> rows = select(query);
+    os << table_name << std::endl;
+    for (const auto row : rows)
     {
-        embedding_str += std::to_string(embedding_cord) + ";";
+        for (const auto element : row)
+        {
+            os << std::to_string(element) << "; ";
+        }
+        os << std::endl;
     }
-    insert(embedding_str, lat, lon);
+    return os;
 }
 
-std::vector<std::vector<double>> GeomapDB::get_closest(const double lat, const double lon, const double eps)
+
+
+
+std::string GeomapDB::get_closest_condition(const double lat, const double lon, const double eps)
 {
     std::string lat_condition = std::to_string(lat - eps) + " <= lat AND lat <= " + std::to_string(lat + eps);
     std::string lon_condition = std::to_string(lon - eps) + " <= lon AND lon <= " + std::to_string(lon + eps);
-    std::string query = "SELECT embedding, lat, lon FROM geomap_embeddings WHERE " + lat_condition + " AND " + lon_condition + ";";
-    std::vector<std::vector<double>> res = select(query);
-    return res;
+    std::string condition = lat_condition + " AND " + lon_condition;
+    return condition;
 }
+
+std::string GeomapDB::get_most_similar_condition(const std::vector<double> &embedding, const double eps)
+{
+    if (embedding.size() != embedding_dim)
+        throw std::runtime_error("Embedding must have " + std::to_string(embedding_dim) + " cords, " + std::to_string(embedding.size()) + " were given!");
+    std::string condition = "(";
+    for (int i = 0; i < embedding_dim; ++i)
+    {
+        condition += "ABS(embedding" + std::to_string(i) + " - " + std::to_string(embedding[i]) + ")";
+        if (i < embedding_dim - 1)
+            condition += " + ";
+        else
+            condition += ")";
+    }
+    condition += " < " + std::to_string(eps);
+    return condition;
+}
+
 
 void GeomapDB::connection()
 {
@@ -51,17 +74,27 @@ void GeomapDB::connection()
 
 void GeomapDB::create_table()
 {
-    int rc = sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS geomap_embeddings(embedding TEXT, lat DOUBLE, lon DOUBLE);", NULL, NULL, &err);
+    std::string embedding_init = "";
+    for (int i = 0; i < embedding_dim; ++i)
+    {
+        embedding_init += ", embedding" + std::to_string(i) + " DOUBLE";
+    }
+    std::string query = "CREATE TABLE IF NOT EXISTS " + table_name + "(lat DOUBLE, lon DOUBLE" + embedding_init + ");";
+    int rc = sqlite3_exec(db, query.c_str(), NULL, NULL, &err);
     if (rc != SQLITE_OK)
     {
         std::cerr << "Creating table error: " << err << std::endl;
     }
 }
 
-void GeomapDB::insert(const std::string &embedding, const double lat, const double lon)
+void GeomapDB::insert(const double lat, const double lon, const std::vector<double> &embedding)
 {
-    std::string values = "('" + embedding + "', " + std::to_string(lat) + ", " + std::to_string(lon) + ")";
-    std::string query = "INSERT INTO geomap_embeddings VALUES " + values + ";";
+    std::string values = std::to_string(lat) + ", " + std::to_string(lon);
+    for (const auto cord : embedding)
+    {
+        values += ", " + std::to_string(cord);
+    }
+    std::string query = "INSERT INTO " + table_name + " VALUES(" + values + ");";
 
     int rc = sqlite3_exec(db, query.c_str(), NULL, NULL, &err);
 
@@ -71,26 +104,49 @@ void GeomapDB::insert(const std::string &embedding, const double lat, const doub
     }
 }
 
+std::vector<std::vector<double>> GeomapDB::get_closest(const double lat, const double lon, const double eps)
+{
+    std::string condition = get_closest_condition(lat, lon, eps);
+    std::string query = "SELECT * FROM " + table_name + " WHERE " + condition + ";";
+    return select(query);
+}
+
+std::vector<std::vector<double>> GeomapDB::get_most_similar(const std::vector<double> &embedding, const double eps)
+{
+    std::string condition = get_most_similar_condition(embedding, eps);
+    std::string query = "SELECT * FROM " + table_name + " WHERE " + condition + ";";
+    return select(query);
+}
+
+std::vector<std::vector<double>> GeomapDB::get_closest_most_similar(const double lat, const double lon, const std::vector<double> &embedding, const double eps_loc, const double eps_emb)
+{
+    std::string condition = get_closest_condition(lat, lon, eps_loc) + " AND " + get_most_similar_condition(embedding, eps_emb);
+    std::string query = "SELECT * FROM " + table_name + " WHERE " + condition + ";";
+    return select(query);
+}
+
 std::vector<std::vector<double>> GeomapDB::select(const std::string &query)
 {
-    sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, 0);
+    int rc = sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, 0);
     std::vector<std::vector<double>> result;
-    std::vector<double> row;
+    if (rc != SQLITE_OK)
+    {
+        return result;
+    }
     while (sqlite3_step(stmt) != SQLITE_DONE)
     {
-        std::string embedding = reinterpret_cast<char const *>(sqlite3_column_text(stmt, 0));
-        std::stringstream ss(embedding);
-        std::string embedding_cord;
-        while (std::getline(ss, embedding_cord, ';'))
-        {
-            row.push_back(stod(embedding_cord));
-        }
-        double lat = sqlite3_column_double(stmt, 1);
-        double lon = sqlite3_column_double(stmt, 2);
+        std::vector<double> row = {};
+        double lat = sqlite3_column_double(stmt, 0);
+        double lon = sqlite3_column_double(stmt, 1);
         row.push_back(lat);
         row.push_back(lon);
+        for (int i = 2; i < embedding_dim + 2; ++i)
+        {
+            double embedding_cord = sqlite3_column_double(stmt, i);
+            row.push_back(embedding_cord);
+        }
         result.push_back(row);
-        row.clear();
     }
+    sqlite3_finalize(stmt);
     return result;
 }

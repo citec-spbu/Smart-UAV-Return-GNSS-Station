@@ -188,7 +188,6 @@ CMakeFiles/Smart-UAV-Return-GNSS-Station.dir/src/geomap_db.cpp.o: /home/denis/Co
   /usr/include/c++/13/bits/range_access.h \
   /usr/include/c++/13/bits/refwrap.h \
   /usr/include/c++/13/bits/requires_hosted.h \
-  /usr/include/c++/13/bits/sstream.tcc \
   /usr/include/c++/13/bits/std_abs.h \
   /usr/include/c++/13/bits/stl_algobase.h \
   /usr/include/c++/13/bits/stl_bvector.h \
@@ -227,7 +226,6 @@ CMakeFiles/Smart-UAV-Return-GNSS-Station.dir/src/geomap_db.cpp.o: /home/denis/Co
   /usr/include/c++/13/istream \
   /usr/include/c++/13/new \
   /usr/include/c++/13/ostream \
-  /usr/include/c++/13/sstream \
   /usr/include/c++/13/stdexcept \
   /usr/include/c++/13/streambuf \
   /usr/include/c++/13/string \
@@ -355,8 +353,6 @@ CMakeFiles/Smart-UAV-Return-GNSS-Station.dir/src/geomap_db.cpp.o: /home/denis/Co
 
 /usr/include/c++/13/stdexcept:
 
-/usr/include/c++/13/sstream:
-
 /usr/include/c++/13/iostream:
 
 /usr/include/c++/13/ios:
@@ -370,6 +366,8 @@ CMakeFiles/Smart-UAV-Return-GNSS-Station.dir/src/geomap_db.cpp.o: /home/denis/Co
 /usr/include/c++/13/ext/alloc_traits.h:
 
 /usr/include/c++/13/debug/assertions.h:
+
+/usr/include/c++/13/cwctype:
 
 /usr/include/c++/13/cwchar:
 
@@ -394,10 +392,6 @@ CMakeFiles/Smart-UAV-Return-GNSS-Station.dir/src/geomap_db.cpp.o: /home/denis/Co
 /usr/include/c++/13/bits/stl_construct.h:
 
 /usr/include/c++/13/bits/stl_algobase.h:
-
-/usr/include/c++/13/cwctype:
-
-/usr/include/c++/13/bits/sstream.tcc:
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h:
 
