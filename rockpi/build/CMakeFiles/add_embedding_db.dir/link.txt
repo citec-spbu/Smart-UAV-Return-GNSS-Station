@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wno-terminate CMakeFiles/add_embedding_db.dir/add_embedding_db.cpp.o -o add_embedding_db  libSmart-UAV-Return-GNSS-Station.a 

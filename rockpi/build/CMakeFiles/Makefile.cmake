@@ -46,4 +46,6 @@ set(CMAKE_MAKEFILE_PRODUCTS
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/Smart-UAV-Return-GNSS-Station.dir/DependInfo.cmake"
   "CMakeFiles/test.dir/DependInfo.cmake"
+  "CMakeFiles/add_embedding_db.dir/DependInfo.cmake"
+  "CMakeFiles/print_table.dir/DependInfo.cmake"
   )

@@ -142,6 +142,80 @@ test/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/build
 .PHONY : test/fast
 
+#=============================================================================
+# Target rules for targets named add_embedding_db
+
+# Build rule for target.
+add_embedding_db: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 add_embedding_db
+.PHONY : add_embedding_db
+
+# fast build rule for target.
+add_embedding_db/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/add_embedding_db.dir/build.make CMakeFiles/add_embedding_db.dir/build
+.PHONY : add_embedding_db/fast
+
+#=============================================================================
+# Target rules for targets named print_table
+
+# Build rule for target.
+print_table: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 print_table
+.PHONY : print_table
+
+# fast build rule for target.
+print_table/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/print_table.dir/build.make CMakeFiles/print_table.dir/build
+.PHONY : print_table/fast
+
+add_embedding_db.o: add_embedding_db.cpp.o
+.PHONY : add_embedding_db.o
+
+# target to build an object file
+add_embedding_db.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/add_embedding_db.dir/build.make CMakeFiles/add_embedding_db.dir/add_embedding_db.cpp.o
+.PHONY : add_embedding_db.cpp.o
+
+add_embedding_db.i: add_embedding_db.cpp.i
+.PHONY : add_embedding_db.i
+
+# target to preprocess a source file
+add_embedding_db.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/add_embedding_db.dir/build.make CMakeFiles/add_embedding_db.dir/add_embedding_db.cpp.i
+.PHONY : add_embedding_db.cpp.i
+
+add_embedding_db.s: add_embedding_db.cpp.s
+.PHONY : add_embedding_db.s
+
+# target to generate assembly for a file
+add_embedding_db.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/add_embedding_db.dir/build.make CMakeFiles/add_embedding_db.dir/add_embedding_db.cpp.s
+.PHONY : add_embedding_db.cpp.s
+
+print_table.o: print_table.cpp.o
+.PHONY : print_table.o
+
+# target to build an object file
+print_table.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/print_table.dir/build.make CMakeFiles/print_table.dir/print_table.cpp.o
+.PHONY : print_table.cpp.o
+
+print_table.i: print_table.cpp.i
+.PHONY : print_table.i
+
+# target to preprocess a source file
+print_table.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/print_table.dir/build.make CMakeFiles/print_table.dir/print_table.cpp.i
+.PHONY : print_table.cpp.i
+
+print_table.s: print_table.cpp.s
+.PHONY : print_table.s
+
+# target to generate assembly for a file
+print_table.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/print_table.dir/build.make CMakeFiles/print_table.dir/print_table.cpp.s
+.PHONY : print_table.cpp.s
+
 sqlite-amalgamation/sqlite3.o: sqlite-amalgamation/sqlite3.c.o
 .PHONY : sqlite-amalgamation/sqlite3.o
 
@@ -223,7 +297,15 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Smart-UAV-Return-GNSS-Station"
+	@echo "... add_embedding_db"
+	@echo "... print_table"
 	@echo "... test"
+	@echo "... add_embedding_db.o"
+	@echo "... add_embedding_db.i"
+	@echo "... add_embedding_db.s"
+	@echo "... print_table.o"
+	@echo "... print_table.i"
+	@echo "... print_table.s"
 	@echo "... sqlite-amalgamation/sqlite3.o"
 	@echo "... sqlite-amalgamation/sqlite3.i"
 	@echo "... sqlite-amalgamation/sqlite3.s"
