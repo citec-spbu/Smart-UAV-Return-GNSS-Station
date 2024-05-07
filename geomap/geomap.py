@@ -3,12 +3,14 @@ This module provides you with all needed functionality to visualize OSM maps
 """
 
 import time
+import os
 import cv2
 import numpy as np
 import osmapi
 import osmium
 
 from geopy.distance import geodesic
+from tqdm import tqdm
 
 COLORSCHEME = {
         'yes' : (0, 0, 255),
@@ -340,6 +342,8 @@ class GeomapFromFile(osmium.SimpleHandler):
         object_location = ((area_coordinates[2] + area_coordinates[0])/2, (area_coordinates[3] + area_coordinates[1])/2)
 
         object_mask = area_mask[crop_above:crop_under, crop_left:crop_right]
+        if not os.path.exists(f"images/{object_tag[0]}"):
+            os.makedirs(f"images/{object_tag[0]}")
         if object_mask.size:
             cv2.imwrite(f"images/{object_tag[0]}/{object_location[0]};{object_location[1]}.png", object_mask)
 
@@ -347,7 +351,7 @@ class GeomapFromFile(osmium.SimpleHandler):
         """
         Draws areas
         """
-        for area in self.__areas:
+        for area in tqdm(self.__areas):
             main_tag = get_description(area['tags'])
             if not main_tag:
                 continue
