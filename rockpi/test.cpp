@@ -34,15 +34,10 @@ int main()
     geomap_db.print_db(cout) << endl;
 
     cout << "Closest similar embeddings" << endl;
-    vector<double> embedding = {1, 2, 3};
-    vector<vector<double>> closest_emb = geomap_db.get_closest_most_similar(71, 30, embedding, 10, 10);
-    for (const auto row : closest_emb)
-    {
-        for (const auto el : row)
-        {
-            cout << el << " ";
-        }
-        cout << endl;
-    }
+    vector<vector<double>> embeddings = {{1, 2, 3}, {2, 2, 2}, {5, 5, 1}};
+    std::vector<double> approx_cords = geomap_db.get_approximate_location(30, 69, 2, embeddings);
+    cout << approx_cords[0] << " " << approx_cords[1] << endl;
+
+
     return 0;
 }

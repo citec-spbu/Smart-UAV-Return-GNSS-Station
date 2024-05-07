@@ -1,6 +1,4 @@
 /home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/rockpi/build/CMakeFiles/Smart-UAV-Return-GNSS-Station.dir
 /home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/rockpi/build/CMakeFiles/test.dir
-/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/rockpi/build/CMakeFiles/add_embedding_db.dir
-/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/rockpi/build/CMakeFiles/print_table.dir
 /home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/rockpi/build/CMakeFiles/edit_cache.dir
 /home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/rockpi/build/CMakeFiles/rebuild_cache.dir

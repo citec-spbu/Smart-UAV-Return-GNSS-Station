@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wno-terminate CMakeFiles/get_approximate_location_db.dir/get_approximate_location_db.cpp.o -o get_approximate_location_db  libSmart-UAV-Return-GNSS-Station.a 

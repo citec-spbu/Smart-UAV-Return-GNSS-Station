@@ -34,9 +34,6 @@ std::ostream &GeomapDB::print_db(std::ostream &os)
     return os;
 }
 
-
-
-
 std::string GeomapDB::get_closest_condition(const double lat, const double lon, const double eps)
 {
     std::string lat_condition = std::to_string(lat - eps) + " <= lat AND lat <= " + std::to_string(lat + eps);
@@ -45,23 +42,21 @@ std::string GeomapDB::get_closest_condition(const double lat, const double lon, 
     return condition;
 }
 
-std::string GeomapDB::get_most_similar_condition(const std::vector<double> &embedding, const double eps)
+std::string GeomapDB::get_embedding_distances_table(const std::vector<double> &embedding)
 {
     if (embedding.size() != embedding_dim)
         throw std::runtime_error("Embedding must have " + std::to_string(embedding_dim) + " cords, " + std::to_string(embedding.size()) + " were given!");
-    std::string condition = "(";
+    std::string condition = "SELECT *, (";
     for (int i = 0; i < embedding_dim; ++i)
     {
         condition += "ABS(embedding" + std::to_string(i) + " - " + std::to_string(embedding[i]) + ")";
         if (i < embedding_dim - 1)
             condition += " + ";
         else
-            condition += ")";
+            condition += ") AS embedding_distance FROM " + table_name;
     }
-    condition += " < " + std::to_string(eps);
     return condition;
 }
-
 
 void GeomapDB::connection()
 {
@@ -104,25 +99,54 @@ void GeomapDB::insert(const double lat, const double lon, const std::vector<doub
     }
 }
 
-std::vector<std::vector<double>> GeomapDB::get_closest(const double lat, const double lon, const double eps)
+std::vector<std::vector<double>> GeomapDB::get_closest_objects(const double lat, const double lon, const double eps)
 {
     std::string condition = get_closest_condition(lat, lon, eps);
     std::string query = "SELECT * FROM " + table_name + " WHERE " + condition + ";";
     return select(query);
 }
 
-std::vector<std::vector<double>> GeomapDB::get_most_similar(const std::vector<double> &embedding, const double eps)
+std::vector<double> GeomapDB::get_most_similar_object(const std::vector<double> &embedding)
 {
-    std::string condition = get_most_similar_condition(embedding, eps);
-    std::string query = "SELECT * FROM " + table_name + " WHERE " + condition + ";";
-    return select(query);
+    std::string embedding_distance_table = get_embedding_distances_table(embedding);
+    std::string query = "SELECT * FROM (" + embedding_distance_table + " ORDER BY embedding_distance) DESK LIMIT 1;";
+    std::vector<std::vector<double>> result = select(query);
+    std::cout << result.size() << std::endl;
+    if (result.empty())
+        return {};
+    else
+        return result[0];
 }
 
-std::vector<std::vector<double>> GeomapDB::get_closest_most_similar(const double lat, const double lon, const std::vector<double> &embedding, const double eps_loc, const double eps_emb)
+std::vector<double> GeomapDB::get_closest_most_similar_object(const double lat, const double lon, const double eps_loc, const std::vector<double> &embedding)
 {
-    std::string condition = get_closest_condition(lat, lon, eps_loc) + " AND " + get_most_similar_condition(embedding, eps_emb);
-    std::string query = "SELECT * FROM " + table_name + " WHERE " + condition + ";";
-    return select(query);
+    std::string condition = get_closest_condition(lat, lon, eps_loc);
+    std::string embedding_distance_table = get_embedding_distances_table(embedding);
+    std::string query = "SELECT * FROM (" + embedding_distance_table + " WHERE " + condition + " ORDER BY embedding_distance)" + "DESK LIMIT 1;";
+    std::vector<std::vector<double>> result = select(query);
+    if (result.empty())
+        return {};
+    else
+        return result[0];
+}
+
+std::vector<double> GeomapDB::get_approximate_location(const double prev_lat, const double prev_lon, const double location_eps, const std::vector<std::vector<double>> &input_embeddings)
+{
+    unsigned found_matches = 0;
+    double approx_lat = 0, approx_lon = 0;
+    for (const auto embedding : input_embeddings)
+    {
+        std::vector<double> embedding_matched = get_closest_most_similar_object(prev_lat, prev_lon, location_eps, embedding);
+        if (!embedding_matched.empty())
+        {
+            ++found_matches;
+            approx_lat += embedding_matched[0];
+            approx_lon += embedding_matched[1];
+        }
+    }
+    approx_lat /= found_matches;
+    approx_lon /= found_matches;
+    return {approx_lat, approx_lon};
 }
 
 std::vector<std::vector<double>> GeomapDB::select(const std::string &query)
