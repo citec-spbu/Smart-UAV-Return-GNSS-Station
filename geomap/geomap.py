@@ -446,14 +446,16 @@ class GeomapFromFile(osmium.SimpleHandler):
         self.image = image
         return image
 
-    def save_image_as(self, file_name : str = 'images/map.png'):
+    def save_image_as(self, file_name : str = 'geomap/images/map.png'):
         """
         Saves map as an image
         """
+        if not os.path.exists(f"geomap/images"):
+            os.makedirs(f"geomap/images")
         cv2.imwrite(file_name, self.image)
 
 if __name__ == '__main__':
-    geomap = GeomapFromFile(30.1801, 59.8841, 30.4623, 60.0149)
+    geomap = GeomapFromFile(30.2775, 59.9091, 30.2974, 59.9164)
     geomap.apply_file("data/northwestern-fed-district-latest.osm.pbf")
     geomap.visualize_map()
     geomap.save_image_as()
