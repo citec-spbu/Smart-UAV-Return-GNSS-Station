@@ -1,4 +1,0 @@
-/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/rockpi/build/CMakeFiles/Smart-UAV-Return-GNSS-Station.dir
-/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/rockpi/build/CMakeFiles/test.dir
-/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/rockpi/build/CMakeFiles/edit_cache.dir
-/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/rockpi/build/CMakeFiles/rebuild_cache.dir

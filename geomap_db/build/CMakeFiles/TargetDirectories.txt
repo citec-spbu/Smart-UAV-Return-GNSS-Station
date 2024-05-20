@@ -1,0 +1,5 @@
+/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/geomap_db/build/CMakeFiles/Smart-UAV-Return-GNSS-Station.dir
+/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/geomap_db/build/CMakeFiles/test.dir
+/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/geomap_db/build/CMakeFiles/add_embeddings.dir
+/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/geomap_db/build/CMakeFiles/edit_cache.dir
+/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/geomap_db/build/CMakeFiles/rebuild_cache.dir

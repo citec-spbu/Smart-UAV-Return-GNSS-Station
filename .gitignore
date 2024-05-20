@@ -9,6 +9,7 @@ data/
 **/.DS_store
 __pycache__/
 **/__pycache__/
+build/*
 *.db
 /preprocessing/.ipynb_checkpoints
 /recognition/.ipynb_checkpoints

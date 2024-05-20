@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wno-terminate CMakeFiles/pre_flight.dir/pre_flight.cpp.o -o pre_flight  libSmart-UAV-Return-GNSS-Station.a /usr/lib/x86_64-linux-gnu/libpython3.12.so 

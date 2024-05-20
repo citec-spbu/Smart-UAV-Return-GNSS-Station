@@ -1,1 +1,0 @@
-/usr/bin/c++  -Wno-terminate CMakeFiles/print_table.dir/print_table.cpp.o -o print_table  libSmart-UAV-Return-GNSS-Station.a 

@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wno-terminate CMakeFiles/test.dir/test.cpp.o -o test  libSmart-UAV-Return-GNSS-Station.a 

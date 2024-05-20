@@ -1,0 +1,7 @@
+opencv-python
+numpy
+osmapi
+osmium
+geopy
+tqdm
+setuptools
