@@ -2,11 +2,20 @@
 
 **Model:** YOLOv8n-seg
 
-## Usage
+## Requirements
 
 ```bash
-pip install ultralytics
+pip install ultralytics numpy opencv-python
 ```
+
+## segmenter.py usage
+
+```python
+from segmenter import segment_buildings
+buildings = segment_buildings('imagename.jpg') # List[np.ndarray]
+```
+
+## YOLOv8seg-n usage
 
 ```python
 from ultralytics import YOLO
