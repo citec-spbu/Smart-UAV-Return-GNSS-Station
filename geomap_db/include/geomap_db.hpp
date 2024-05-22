@@ -18,7 +18,6 @@ public:
     std::vector<std::vector<double>> get_closest_objects(const double, const double, const double);
     std::vector<double> get_most_similar_object(const std::vector<double> &);
     std::vector<double> get_closest_most_similar_object(const double, const double, const double, const std::vector<double> &);
-    std::vector<double> get_approximate_location(const double, const double, const double, const std::vector<std::vector<double>> &);
 
 private:
     std::string db_name;

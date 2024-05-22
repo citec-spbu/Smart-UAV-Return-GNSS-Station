@@ -1,0 +1,4 @@
+[submodule "geomap_db/pybind11"]
+	path = geomap_db/pybind11
+	url = ../../pybind/pybind11
+	branch = stable

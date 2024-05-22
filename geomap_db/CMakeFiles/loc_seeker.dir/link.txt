@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wno-terminate -flto CMakeFiles/loc_seeker.dir/src/loc_seeker.cpp.o -o loc_seeker  libSmart-UAV-Return-GNSS-Station.a /usr/lib/x86_64-linux-gnu/libpython3.12.so 

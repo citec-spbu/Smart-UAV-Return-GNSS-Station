@@ -1,0 +1,8 @@
+/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/geomap_db/CMakeFiles/Smart-UAV-Return-GNSS-Station.dir
+/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/geomap_db/CMakeFiles/add_embeddings.dir
+/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/geomap_db/CMakeFiles/print_table.dir
+/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/geomap_db/CMakeFiles/get_aprox_location.dir
+/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/geomap_db/CMakeFiles/edit_cache.dir
+/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/geomap_db/CMakeFiles/rebuild_cache.dir
+/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/geomap_db/pybind11/CMakeFiles/edit_cache.dir
+/home/denis/Coding/projects/Smart-UAV-Return-GNSS-Station/geomap_db/pybind11/CMakeFiles/rebuild_cache.dir
